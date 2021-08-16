@@ -53,14 +53,19 @@ class Exercise9Fragment : BaseFragment() {
             coroutineScope.launch {
                 try {
                     btnFetch.isEnabled = false
-                    fetchAndCacheUsersUseCase.fetchAndCacheUsers(userIds)
+                    val users = fetchAndCacheUsersUseCase.fetchAndCacheUsers(userIds)
+                    bindUsers(users)
                     updateElapsedTimeJob.cancel()
                 } catch (e: CancellationException) {
-                    updateElapsedTimeJob.cancelAndJoin()
-                    txtElapsedTime.text = ""
-                    txtUsers.text = ""
+                    withContext(NonCancellable) {
+                        updateElapsedTimeJob.cancelAndJoin()
+                        txtElapsedTime.text = ""
+                        txtUsers.text = ""
+                    }
                 } finally {
-                    btnFetch.isEnabled = true
+                    withContext(NonCancellable) {
+                        btnFetch.isEnabled = true
+                    }
                 }
             }
         }
